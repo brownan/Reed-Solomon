@@ -1,0 +1,21 @@
+k = message length (usually 223)
+s = error correcting power (usually 16)
+n = k + 2s total message length (usually 255)
+
+j = number of distinct digit values (for each digit in message/codeword) (256)
+
+k digit message:
+m_0, m_1, ..., m_(k-1)
+
+message polynomial:
+m(x) = m_0 + m_1 x + m_2 x^2 + ... + m_(k-1) x^(k-1)
+
+map all distinct digit values (all j of them) to elements in a field F
+
+F[x] = set of polynomials with coefficients in F
+
+g(x) = (x - alpha) * (x - alpha^2) ... (x - alpha^(2s)) generator polynomial
+where alpha is a primitive (generator) element of GF(p^r)
+
+k digit messages are mapped to a multiple of g(x). All codewords are multiples
+of g(x)
