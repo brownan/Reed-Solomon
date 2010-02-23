@@ -1,6 +1,6 @@
 import unittest
 
-from ff import Polynomial
+from polynomial import Polynomial
 
 class TestPolynomial(unittest.TestCase):
     def test_add_1(self):
