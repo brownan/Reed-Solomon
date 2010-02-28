@@ -1,3 +1,5 @@
+from StringIO import StringIO
+
 class Polynomial(object):
     """Polynomial objects are immutable"""
     def __init__(self, coefficients):
@@ -6,6 +8,7 @@ class Polynomial(object):
         Each coefficient should be an integer
         """
         c = list(coefficients)
+        # Expunge any leading 0 coefficients
         while c and c[0] == 0:
             c.pop(0)
         if not c:
@@ -59,15 +62,23 @@ class Polynomial(object):
 
         quotient_power = dividend_power - divisor_power
         if quotient_power < 0:
+            # Doesn't divide at all, return 0 for the quotient and the entire
+            # dividend as the remander
             return Polynomial((0,)), self
-        quotient_coefficient = 1.0 * dividend_coefficient / divisor_coefficient
+
+        # Compute how many times the highest order term in the divisor goes
+        # into the dividend
+        quotient_coefficient = dividend_coefficient / divisor_coefficient
         quotient = Polynomial( (quotient_coefficient,) + (0,) * quotient_power )
 
         remander = self - quotient * other
 
         if remander.coefficients == (0,):
+            # Goes in evenly with no remainder, we're done
             return quotient, remander
 
+        # There was a remander, see how many times the remainder goes into the
+        # divisor
         morequotient, remander = divmod(remander, other)
         return quotient + morequotient, remander
 
@@ -96,3 +107,22 @@ class Polynomial(object):
                 buf.write("%s" % c)
             buf.write(" + ")
         return buf.getvalue()[:-3]
+
+    def evaluate(self, x):
+        """Evaluate this polynomial at value x, returning the result.  To be
+        completely general, this method is written to explicitly do each
+        calculation, taking O(n) time where n is len(self)
+        """
+        # Holds the sum over each term in the polynomial
+        c = 0
+
+        # Holds the current power of x. This is multiplied by x after each term
+        # in the polynomial is added up.
+        p = 1
+
+        for term in reversed(self.coefficients):
+            c = c + term * p
+
+            p = p * x
+
+        return c

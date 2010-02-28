@@ -50,7 +50,6 @@ class GF256int(int):
             49, 254, 24, 13, 99, 140, 128, 192, 247, 112, 7)
 
     def __new__(cls, value):
-
         # Check cache
         try:
             return GF256int.cache[value]
@@ -84,6 +83,8 @@ class GF256int(int):
     __rmul__ = __mul__
 
     def __pow__(self, power):
+        if isinstance(power, GF256int):
+            raise Exception("Raising a Field element to another Field element is not defined")
         x = GF256int.logtable[self]
         z = (x * power) % 255
         return GF256int(GF256int.exptable[z])

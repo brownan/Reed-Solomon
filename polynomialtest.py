@@ -1,6 +1,36 @@
 import unittest
 
 from polynomial import Polynomial
+from ff import GF256int
+
+class TestGFPoly(unittest.TestCase):
+    def test_add(self):
+        one = Polynomial(map(GF256int,     (8,3,5,1)))
+        two = Polynomial(map(GF256int, (5,3,1,1,6,8)))
+
+        r = one + two
+
+        self.assertEqual(r.coefficients, (5,3,9,2,3,9))
+
+    def test_sub(self):
+        one = Polynomial(map(GF256int,     (8,3,5,1)))
+        two = Polynomial(map(GF256int, (5,3,1,1,6,8)))
+        r = one - two
+        self.assertEqual(r.coefficients, (5,3,9,2,3,9))
+
+    def test_mul(self):
+        one = Polynomial(map(GF256int,     (8,3,5,1)))
+        two = Polynomial(map(GF256int, (5,3,1,1,6,8)))
+        r = one * two
+        self.assertEqual(r.coefficients, (40,23,28,1,53,78,7,46,8))
+
+    def test_div(self):
+        one = Polynomial(map(GF256int,     (8,3,5,1)))
+        two = Polynomial(map(GF256int, (5,3,1,1,6,8)))
+        q, r = divmod(two,one)
+        self.assertEqual(q.coefficients, (101, 152, 11))
+        self.assertEqual(r.coefficients, (183, 185, 3))
+
 
 class TestPolynomial(unittest.TestCase):
     def test_add_1(self):
