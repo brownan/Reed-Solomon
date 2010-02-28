@@ -49,22 +49,23 @@ def encode(message, poly=False):
     mprime = m * Polynomial((GF256int(1),) + (GF256int(0),)*(n-k))
 
     # mprime = q*g + b for some q
+    # so let's find b:
     b = mprime % g
 
     # Subtract out b, so now c = q*g
-    # Since c is a multiple of g, it has n-k roots at α^1 through α^(n-k)
     c = mprime - b
+    # Since c is a multiple of g, it has (at least) n-k roots: α^1 through
+    # α^(n-k)
 
     if poly:
         return c
 
     # Turn the polynomial c back into a byte string
-
     return "".join(chr(x) for x in c.coefficients)
 
 def verify(code):
-    """Verifies the code is valid by testing that
-    c * h (mod g*h) is 0
+    """Verifies the code is valid by testing that the code as a polynomial code
+    divides g
     returns True/False
     """
     c = Polynomial(GF256int(ord(x)) for x in code)
