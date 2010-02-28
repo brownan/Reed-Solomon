@@ -32,7 +32,12 @@ for alpha in xrange(n-k+1,n+1):
 # g*h is used in verification, and is always x^255+1 when n=255
 gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
 
-def encode(message):
+def encode(message, poly=False):
+    """Encode a given string with reed-solomon encoding. Returns a byte
+    stream with 32 parity bytes at the end.
+    If poly is not False, returns the encoded Polynomial object instead of
+    the polynomial translated back to a string
+    """
     if len(message)>k:
         raise ValueError("Message length is max %d. Message was %d" % (k,
             len(message)))
@@ -43,9 +48,15 @@ def encode(message):
     # Shift polynomial up by n-k (32) by multiplying by x^32
     mprime = m * Polynomial((GF256int(1),) + (GF256int(0),)*(n-k))
 
+    # mprime = q*g + b for some q
     b = mprime % g
 
+    # Subtract out b, so now c = q*g
+    # Since c is a multiple of g, it has n-k roots at α^1 through α^(n-k)
     c = mprime - b
+
+    if poly:
+        return c
 
     # Turn the polynomial c back into a byte string
 
@@ -57,4 +68,10 @@ def verify(code):
     returns True/False
     """
     c = Polynomial(GF256int(ord(x)) for x in code)
-    return (c*h)%gtimesh == Polynomial((0,))
+    # Not sure what I was thinking with this, it still works...
+    #return (c*h)%gtimesh == Polynomial((0,))
+
+    # ...But since all codewords are multiples of g, checking that code divides
+    # g should suffice for validating a codeword.
+    return c % g == Polynomial((0,))
+
