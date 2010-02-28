@@ -99,6 +99,8 @@ class Polynomial(object):
             if not c and i > 0:
                 continue
             power = l - i
+            if c == 1 and power != 0:
+                c = ""
             if power > 1:
                 buf.write("%sx^%s" % (c, power))
             elif power == 1:

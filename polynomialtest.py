@@ -4,6 +4,9 @@ from polynomial import Polynomial
 from ff import GF256int
 
 class TestGFPoly(unittest.TestCase):
+    """Tests that the Polynomial class works when given GF256int objects
+    instead of regular integers
+    """
     def test_add(self):
         one = Polynomial(map(GF256int,     (8,3,5,1)))
         two = Polynomial(map(GF256int, (5,3,1,1,6,8)))
@@ -30,6 +33,9 @@ class TestGFPoly(unittest.TestCase):
         q, r = divmod(two,one)
         self.assertEqual(q.coefficients, (101, 152, 11))
         self.assertEqual(r.coefficients, (183, 185, 3))
+
+        # Make sure they multiply back out okay
+        self.assertEqual(q*one + r, two)
 
 
 class TestPolynomial(unittest.TestCase):
