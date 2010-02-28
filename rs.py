@@ -29,6 +29,9 @@ for alpha in xrange(n-k+1,n+1):
     #print "\tGot %s" % g
 #print "h is %s" % h
 
+# g*h is used in verification, and is always x^255+1 when n=255
+gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
+
 def encode(message):
     if len(message)>n:
         raise ValueError("Message length is max 255")
@@ -53,4 +56,4 @@ def verify(code):
     returns True/False
     """
     c = Polynomial(GF256int(ord(x)) for x in code)
-    return (c*h)%(g*h) == Polynomial((0,))
+    return (c*h)%gtimesh == Polynomial((0,))

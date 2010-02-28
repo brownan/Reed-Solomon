@@ -39,6 +39,9 @@ class Polynomial(object):
         terms = [0] * (len(self) + len(other))
 
         for i1, c1 in enumerate(reversed(self.coefficients)):
+            if c1 == 0:
+                # Optimization
+                continue
             for i2, c2 in enumerate(reversed(other.coefficients)):
                 terms[i1+i2] += c1*c2
 
