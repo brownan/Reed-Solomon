@@ -33,8 +33,9 @@ for alpha in xrange(n-k+1,n+1):
 gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
 
 def encode(message):
-    if len(message)>n:
-        raise ValueError("Message length is max 255")
+    if len(message)>k:
+        raise ValueError("Message length is max %d. Message was %d" % (k,
+            len(message)))
 
     # Encode message as a polynomial:
     m = Polynomial(GF256int(ord(x)) for x in message)
