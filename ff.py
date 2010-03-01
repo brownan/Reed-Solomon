@@ -1,5 +1,3 @@
-from StringIO import StringIO
-
 class GF256int(int):
     """Instances of this object are elements of the field GF(2^8)
     Instances are integers in the range 0 to 255
@@ -51,6 +49,8 @@ class GF256int(int):
 
     def __new__(cls, value):
         # Check cache
+        # Caching sacrifices a bit of speed for less memory usage. This way,
+        # there are only a max of 256 instances of this class at any time.
         try:
             return GF256int.cache[value]
         except KeyError:

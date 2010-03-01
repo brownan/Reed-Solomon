@@ -11,7 +11,8 @@ class TestRS(unittest.TestCase):
     def test_two(self):
         """Verifies that changing any single character will invalidate the
         codeword"""
-        code = rs.encode("Hello, world!")
+        code = rs.encode("Hello, world! This is a test message, to be encoded,"
+                " and verified.")
 
         for i, c in enumerate(code):
             # Change the value at position i and verify that the code is not
