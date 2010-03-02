@@ -1,7 +1,9 @@
 from StringIO import StringIO
 
 class Polynomial(object):
-    """Polynomial objects are immutable"""
+    """Completely general polynomial class.
+    
+    Polynomial objects are immutable"""
     def __init__(self, coefficients):
         """Creates a new polynomial object with the given coefficients.
         Coefficients are given with the hightest order term first.

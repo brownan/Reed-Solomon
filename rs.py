@@ -34,7 +34,7 @@ gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
 
 def encode(message, poly=False):
     """Encode a given string with reed-solomon encoding. Returns a byte
-    stream with 32 parity bytes at the end.
+    string with 32 parity bytes at the end.
     If poly is not False, returns the encoded Polynomial object instead of
     the polynomial translated back to a string
     """
