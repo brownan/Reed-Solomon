@@ -15,19 +15,13 @@ k = 223
 g = Polynomial((GF256int(1),))
 for alpha in xrange(1,n-k+1):
     p = Polynomial((GF256int(1), GF256int(3)**alpha))
-    #print "Multiplying in %s" % p
     g = g * p
-    #print "\tGot %s" % g
 
-#print "g is %s\nComputing h..." % g
 
 h = Polynomial((GF256int(1),))
 for alpha in xrange(n-k+1,n+1):
     p = Polynomial((GF256int(1), GF256int(3)**alpha))
-    #print "Multiplying in %s" % p
     h = h * p
-    #print "\tGot %s" % g
-#print "h is %s" % h
 
 # g*h is used in verification, and is always x^255+1 when n=255
 gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
@@ -76,3 +70,28 @@ def verify(code):
     # g should suffice for validating a codeword.
     return c % g == Polynomial((0,))
 
+def decode(r):
+    """Given a received byte string r, attempts to decode it. If it's a valid
+    codeword, or if there are less than 2s errors, the message is returned
+    """
+    if verify(r):
+        # The last 32 bytes are parity
+        return r[:-32]
+
+    raise NotImplementedError()
+
+def _syndromes(r):
+    """Given the received codeword r in the form of a Polynomial object,
+    computes the syndromes and returns the syndrome polynomial
+    """
+    # s[l] is the received codeword evaluated at α^l for 1 <= l <= s
+    # α in this implementation is 3
+    s = [0] # s[0] is not defined
+    for l in xrange(1, n-k+1):
+        s.append( r.evaluate( GF256int(3)**l ) )
+
+    # Now build a polynomial out of all our s[l] values
+    # s(z) = sum(s_i * z^i, i=1..inf)
+    sz = Polynomial( reversed( s ) )
+
+    return sz

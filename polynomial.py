@@ -4,18 +4,57 @@ class Polynomial(object):
     """Completely general polynomial class.
     
     Polynomial objects are immutable"""
-    def __init__(self, coefficients):
-        """Creates a new polynomial object with the given coefficients.
-        Coefficients are given with the hightest order term first.
-        Each coefficient should be an integer
+    def __init__(self, coefficients=(), **sparse):
         """
-        c = list(coefficients)
-        # Expunge any leading 0 coefficients
-        while c and c[0] == 0:
-            c.pop(0)
-        if not c:
-            c.append(0)
-        self.coefficients = tuple(c)
+        There are three ways to initialize a Polynomial object.
+        1) With a list, tuple, or other iterable, creates a polynomial using
+        the items as coefficients in order of decreasing power
+
+        2) With keyword arguments such as for example x3=5, sets the
+        coefficient of x^3 to be 5
+
+        3) With no arguments, creates an empty polynomial, equivilant to
+        Polynomial((0,))
+
+        >>> print Polynomial((5, 0, 0, 0, 0, 0))
+        5x^5
+
+        >>> print Polynomial(x32=5, x64=8)
+        8x^64 + 5x^32
+
+        >>> print(Polynomial(x5=5, x9=4, x0=2))
+        4x^9 + 5x^5 + 2
+        """
+        if coefficients and sparse:
+            raise TypeError("Specify coefficients list /or/ keyword terms, not"
+                    " both")
+        if coefficients:
+            # Polynomial((1, 2, 3, ...))
+            c = list(coefficients)
+            # Expunge any leading 0 coefficients
+            while c and c[0] == 0:
+                c.pop(0)
+            if not c:
+                c.append(0)
+
+            self.coefficients = tuple(c)
+        elif sparse:
+            # Polynomial(x32=...)
+            powers = sparse.keys()
+            powers.sort(reverse=1)
+            # Not catching possible exceptions from the following line, let
+            # them bubble up.
+            highest = int(powers[0][1:])
+            coefficients = [0] * (highest+1)
+
+            for power, coeff in sparse.iteritems():
+                power = int(power[1:])
+                coefficients[highest - power] = coeff
+
+            self.coefficients = tuple(coefficients)
+        else:
+            # Polynomial()
+            self.coefficients = (0,)
 
     def __len__(self):
         """Returns the number of terms in the polynomial"""
