@@ -4,6 +4,9 @@ from polynomial import Polynomial
 
 """This module implements Reed-Solomon Encoding.
 Specifically, RS(255,223), 223 data bytes and 32 parity bytes
+
+Warning: Because of the way I've implemented things, leading null bytes in a
+message are dropped. Be careful if encoding binary data.
 """
 
 n = 255
@@ -78,7 +81,28 @@ def decode(r):
         # The last 32 bytes are parity
         return r[:-32]
 
-    raise NotImplementedError()
+    # Compute the syndromes:
+    sz = _syndromes(r)
+
+    # Find the error locator polynomial and error evaluator polynomial using
+    # the Berlekamp-Massey algorithm
+    sigma, omega = _berlekamp_massey()
+
+    # Now use Chien's procedure to find the error locations
+    X = _chien_search(sigma)
+
+    # And finally, find the error magnitudes with Forney's Formula
+    Y = _forney(omega, X)
+
+    # Put the error and locations together to form the error polynomial
+    # TODO
+
+    # And we get our real codeword!
+    c = r - E
+
+    # Form it back into a string and return all but the last 32 bytes
+    return "".join(chr(x) for x in c.coefficients)[:-32]
+
 
 def _syndromes(r):
     """Given the received codeword r in the form of a Polynomial object,
@@ -86,7 +110,7 @@ def _syndromes(r):
     """
     # s[l] is the received codeword evaluated at α^l for 1 <= l <= s
     # α in this implementation is 3
-    s = [0] # s[0] is not defined
+    s = [GF256int(0)] # s[0] is not defined
     for l in xrange(1, n-k+1):
         s.append( r.evaluate( GF256int(3)**l ) )
 
@@ -95,3 +119,27 @@ def _syndromes(r):
     sz = Polynomial( reversed( s ) )
 
     return sz
+
+def _berlekamp_massey(s):
+    """Computes and returns the error locator polynomial (sigma) and the error
+    evaluator polynomial (omega)
+    The parameter s is the syndrome polynomial (syndromes encoded in a
+    generator function)
+    """
+    # Initialize
+    sigma =  [ Polynomial((GF256int(1),)) ]
+    omega =  [ Polynomial((GF256int(1),)) ]
+    tao =    [ Polynomial((GF256int(1),)) ]
+    gamma =  [ Polynomial((GF256int(1),)) ]
+    D =      [ GF256int(0) ]
+    B =      [ GF256int(0) ]
+    
+    # TODO
+
+    return sigma[-1], omega[-1]
+
+def _chien_search(sigma):
+    pass # TODO
+
+def _forney(omega, X):
+    pass # TODO
