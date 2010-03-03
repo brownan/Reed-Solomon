@@ -24,7 +24,7 @@ for alpha in xrange(n-k+1,n+1):
     h = h * p
 
 # g*h is used in verification, and is always x^255+1 when n=255
-gtimesh = Polynomial((GF256int(1),) + (GF256int(0),)*(n-1) + (GF256int(1),))
+gtimesh = Polynomial(x255=GF256int(1), x0=GF256int(1))
 
 def encode(message, poly=False):
     """Encode a given string with reed-solomon encoding. Returns a byte
