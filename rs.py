@@ -81,6 +81,9 @@ def decode(r):
         # The last 32 bytes are parity
         return r[:-32]
 
+    # Turn r into a polynomial
+    r = Polynomial(GF256int(ord(x)) for x in r)
+
     # Compute the syndromes:
     sz = _syndromes(r)
 

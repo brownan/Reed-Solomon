@@ -97,3 +97,7 @@ class GF256int(int):
         return self * GF256int(other).inverse()
     def __rdiv__(self, other):
         return self.inverse() * other
+
+    def __repr__(self):
+        n = self.__class__.__name__
+        return "%s(%r)" % (n, int(self))
