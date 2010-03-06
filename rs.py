@@ -9,24 +9,25 @@ Warning: Because of the way I've implemented things, leading null bytes in a
 message are dropped. Be careful if encoding binary data.
 """
 
+# Constants (do not change)
 n = 255
 k = 223
 
 # Generate the generator polynomial for RS codes
-# g(x) = (x-α^0)(x-α^1)...(x-α^254)
+# g(x) = (x-α^1)(x-α^2)...(x-α^32)
 # α is 3, a generator for GF(2^8)
 g = Polynomial((GF256int(1),))
 for alpha in xrange(1,n-k+1):
     p = Polynomial((GF256int(1), GF256int(3)**alpha))
     g = g * p
 
-
+# h(x) = (x-α^33)(x-α^34)...(x-α^255)
 h = Polynomial((GF256int(1),))
 for alpha in xrange(n-k+1,n+1):
     p = Polynomial((GF256int(1), GF256int(3)**alpha))
     h = h * p
 
-# g*h is used in verification, and is always x^255+1 when n=255
+# g*h is used in verification, and is always x^255-1 when n=255
 gtimesh = Polynomial(x255=GF256int(1), x0=GF256int(1))
 
 def encode(message, poly=False):
@@ -77,9 +78,9 @@ def decode(r):
     """Given a received byte string r, attempts to decode it. If it's a valid
     codeword, or if there are less than 2s errors, the message is returned
     """
-    if verify(r):
-        # The last 32 bytes are parity
-        return r[:-32]
+    #if verify(r):
+    #    # The last 32 bytes are parity
+    #    return r[:-32]
 
     # Turn r into a polynomial
     r = Polynomial(GF256int(ord(x)) for x in r)
@@ -89,7 +90,9 @@ def decode(r):
 
     # Find the error locator polynomial and error evaluator polynomial using
     # the Berlekamp-Massey algorithm
-    sigma, omega = _berlekamp_massey()
+    sigma, omega = _berlekamp_massey(sz)
+    print "sigma=%s" % sigma
+    print "omega=%s" % omega
 
     # Now use Chien's procedure to find the error locations
     X = _chien_search(sigma)
@@ -113,7 +116,7 @@ def _syndromes(r):
     """
     # s[l] is the received codeword evaluated at α^l for 1 <= l <= s
     # α in this implementation is 3
-    s = [GF256int(0)] # s[0] is not defined
+    s = [GF256int(0)] # s[0] is 0 (coefficient of z^0)
     for l in xrange(1, n-k+1):
         s.append( r.evaluate( GF256int(3)**l ) )
 
@@ -128,16 +131,96 @@ def _berlekamp_massey(s):
     evaluator polynomial (omega)
     The parameter s is the syndrome polynomial (syndromes encoded in a
     generator function)
+
+    Notes:
+    The error polynomial:
+    E(x) = E_0 + E_1 x + ... + E_(n-1) x^(n-1)
+
+    j_1, j_2, ..., j_s are the error positions. (There are at most s errors)
+
+    Error location X_i is defined: X_i = α^(j_i)
+    that is, the power of α corresponding to the error location
+
+    Error magnitude Y_i is defined: E_(j_i)
+    that is, the coefficient in the error polynomial at position j_i
+
+    Error locator polynomial:
+    sigma(z) = Product( 1 - X_i * z, i=1..s )
+    roots are the reciprocals of the error locations
+    ( 1/X_1, 1/X_2, ...)
+
+    Error evaluator polynomial omega(z) not written here
     """
-    # Initialize
+    # Initialize:
     sigma =  [ Polynomial((GF256int(1),)) ]
     omega =  [ Polynomial((GF256int(1),)) ]
     tao =    [ Polynomial((GF256int(1),)) ]
     gamma =  [ Polynomial((GF256int(1),)) ]
-    D =      [ GF256int(0) ]
-    B =      [ GF256int(0) ]
+    D =      [ 0 ]
+    B =      [ 0 ]
+
+    # Polonomial constants:
+    ONE = Polynomial(x0=GF256int(1))
+    ZERO = Polynomial(x0=GF256int(0))
+    Z = Polynomial(x1=GF256int(1))
     
-    # TODO
+    # Iteratively compute the polynomials 2s times. The last ones will be
+    # correct
+    for l in xrange(0, 32):
+        # Goal for each iteration: Compute sigma[l] and omega[l] such that
+        # (1 + s)*sigma[l] == omega[l] in mod z^(l+1)
+
+        # For this particular loop iteration, we have sigma[l] and omega[l],
+        # and are computing sigma[l+1] and omega[l+1]
+        
+        # First find Delta, the non-zero coefficient of z^(l+1) in
+        # (1 + s) * sigma[l]
+        # This delta is valid for l (this iteration) only
+        Delta = ( (ONE + s) * sigma[l] ).get_coefficient(l+1)
+        # Make it a polynomial of degree 0
+        Delta = Polynomial(x0=Delta)
+
+        # Can now compute sigma[l+1] and omega[l+1] from
+        # sigma[l], omega[l], tao[l], gamma[l], and Delta
+        sigma.append(
+                sigma[l] - Delta * Z * tao[l]
+                )
+        omega.append(
+                omega[l] - Delta * Z * gamma[l]
+                )
+
+        # Now compute the next tao and gamma
+        # There are two ways to do this
+        if Delta == ZERO or D[l] > (l+1)//2:
+            # Rule A
+            D.append( D[l] )
+            B.append( B[l] )
+            tao.append( Z * tao[l] )
+            gamma.append( Z * gamma[l] )
+
+        elif Delta != ZERO and D[l] < (l+1)//2:
+            # Rule B
+            D.append( l + 1 - D[l] )
+            B.append( 1 - B[l] )
+            tao.append( sigma[l] // Delta )
+            gamma.append( omega[l] // Delta )
+        elif D[l] == (l+1)//2:
+            if B[l] == 0:
+                # Rule A (same as above)
+                D.append( D[l] )
+                B.append( B[l] )
+                tao.append( Z * tao[l] )
+                gamma.append( Z * gamma[l] )
+
+            else:
+                # Rule B (same as above)
+                D.append( l + 1 - D[l] )
+                B.append( 1 - B[l] )
+                tao.append( sigma[l] // Delta )
+                gamma.append( omega[l] // Delta )
+        else:
+            raise Exception("Code shouldn't have gotten here")
+
 
     return sigma[-1], omega[-1]
 

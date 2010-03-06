@@ -59,6 +59,9 @@ class Polynomial(object):
     def __len__(self):
         """Returns the number of terms in the polynomial"""
         return len(self.coefficients)
+    def degree(self):
+        """Returns the degree of the polynomial"""
+        return len(self.coefficients) - 1
 
     def __add__(self, other):
         diff = len(self) - len(other)
@@ -172,3 +175,10 @@ class Polynomial(object):
             p = p * x
 
         return c
+
+    def get_coefficient(self, degree):
+        """Returns the coefficient of the specified term"""
+        if degree > self.degree():
+            return 0
+        else:
+            return self.coefficients[-(degree+1)]
