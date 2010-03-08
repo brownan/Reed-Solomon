@@ -95,13 +95,23 @@ def decode(r):
     print "omega=%s" % omega
 
     # Now use Chien's procedure to find the error locations
-    X = _chien_search(sigma)
+    X, j = _chien_search(sigma)
+    print "X=%s" % X
+    print "j=%s" % j
 
     # And finally, find the error magnitudes with Forney's Formula
     Y = _forney(omega, X)
+    print "Y=%s" % Y
 
     # Put the error and locations together to form the error polynomial
-    # TODO
+    Elist = []
+    for i in xrange(255):
+        if i in j:
+            Elist.append(Y[j.index(i)])
+        else:
+            Elist.append(GF256int(0))
+    E = Polynomial(reversed(Elist))
+    print "E=%s" % E
 
     # And we get our real codeword!
     c = r - E
@@ -155,19 +165,19 @@ def _berlekamp_massey(s):
     sigma =  [ Polynomial((GF256int(1),)) ]
     omega =  [ Polynomial((GF256int(1),)) ]
     tao =    [ Polynomial((GF256int(1),)) ]
-    gamma =  [ Polynomial((GF256int(1),)) ]
+    gamma =  [ Polynomial((GF256int(0),)) ]
     D =      [ 0 ]
     B =      [ 0 ]
 
     # Polonomial constants:
-    ONE = Polynomial(x0=GF256int(1))
-    ZERO = Polynomial(x0=GF256int(0))
-    Z = Polynomial(x1=GF256int(1))
+    ONE = Polynomial(z0=GF256int(1))
+    ZERO = Polynomial(z0=GF256int(0))
+    Z = Polynomial(z1=GF256int(1))
     
     # Iteratively compute the polynomials 2s times. The last ones will be
     # correct
     for l in xrange(0, 32):
-        # Goal for each iteration: Compute sigma[l] and omega[l] such that
+        # Goal for each iteration: Compute sigma[l+1] and omega[l+1] such that
         # (1 + s)*sigma[l] == omega[l] in mod z^(l+1)
 
         # For this particular loop iteration, we have sigma[l] and omega[l],
@@ -191,20 +201,20 @@ def _berlekamp_massey(s):
 
         # Now compute the next tao and gamma
         # There are two ways to do this
-        if Delta == ZERO or D[l] > (l+1)//2:
+        if Delta == ZERO or 2*D[l] > (l+1):
             # Rule A
             D.append( D[l] )
             B.append( B[l] )
             tao.append( Z * tao[l] )
             gamma.append( Z * gamma[l] )
 
-        elif Delta != ZERO and D[l] < (l+1)//2:
+        elif Delta != ZERO and 2*D[l] < (l+1):
             # Rule B
             D.append( l + 1 - D[l] )
             B.append( 1 - B[l] )
             tao.append( sigma[l] // Delta )
             gamma.append( omega[l] // Delta )
-        elif D[l] == (l+1)//2:
+        elif 2*D[l] == (l+1):
             if B[l] == 0:
                 # Rule A (same as above)
                 D.append( D[l] )
@@ -222,10 +232,57 @@ def _berlekamp_massey(s):
             raise Exception("Code shouldn't have gotten here")
 
 
+    print "sigmas:"
+    for s in sigma:
+        print "  %s" % s
+    print "omegas:"
+    for o in omega:
+        print "  %s" % o
     return sigma[-1], omega[-1]
 
 def _chien_search(sigma):
-    pass # TODO
+    """Recall the definition of sigma, it has s (16) roots. To find them,
+    this function evaluates sigma at all 255 non-zero points to find the roots
+    The inverse of the roots are X_i, the error locations
+
+    Returns a list X of error locations, and a corresponding list j of error
+    positions (the discrete log of the corresponding X value)
+    The lists are up to s (16) elements large.
+    """
+    X = []
+    j = []
+    p = GF256int(3)
+    for l in xrange(1,256):
+        # These evaluations could be more efficient, but oh well
+        if sigma.evaluate( p**l ) == 0:
+            X.append( p**(-l) )
+            # This is different than the notes, I think the notes were in error
+            # Notes said j values were just l, when it's actually 255-l
+            j.append(255 - l)
+
+    return X, j
 
 def _forney(omega, X):
-    pass # TODO
+    """Computes the error magnitudes"""
+    Y = []
+
+    for l, Xl in enumerate(X):
+        # Compute the first part of Yl
+        Yl = Xl**16
+        Yl *= omega.evaluate( Xl.inverse() )
+        Yl *= Xl.inverse()
+
+        # Compute the sequence product and multiply its inverse in
+        prod = GF256int(1)
+        for ji in xrange(16):
+            if ji == l:
+                continue
+            if ji < len(X):
+                Xj = X[ji]
+            else:
+                Xj = GF256int(0)
+            prod = prod * (Xl - Xj)
+        Yl = Yl * prod.inverse()
+
+        Y.append(Yl)
+    return Y

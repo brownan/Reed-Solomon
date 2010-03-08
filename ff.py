@@ -75,7 +75,7 @@ class GF256int(int):
         """Multiplication in GF(2^8)
         """
         if a == 0 or b == 0:
-            return 0
+            return GF256int(0)
         x = GF256int.logtable[a]
         y = GF256int.logtable[b]
         z = (x + y) % 255

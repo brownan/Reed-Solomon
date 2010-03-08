@@ -38,6 +38,19 @@ class TestGFPoly(unittest.TestCase):
         self.assertEqual(q*one + r, two)
 
     def test_div_scalar(self):
+        """Tests division by a scalar"""
+        numbers = map(GF256int, (5,20,50,100,134,158,0,148,233,254,4,5,2))
+        scalar = GF256int(17)
+
+        poly = Polynomial(numbers)
+        scalarpoly = Polynomial(x0=scalar)
+
+        self.assertEqual(
+                (poly // scalarpoly).coefficients,
+                tuple(map(lambda x: x / scalar, numbers))
+                )
+
+    def test_div_scalar2(self):
         """Test that dividing by a scalar is the same as multiplying by the
         scalar's inverse"""
         a = Polynomial(map(GF256int, (5,3,1,1,6,8)))
@@ -132,10 +145,10 @@ class TestPolynomial(unittest.TestCase):
         self.assertEqual(r.coefficients, (0,))
 
     def test_getcoeff(self):
-        p = Polynomial((1,0,0,2,2,0,1,-2,-4))
+        p = Polynomial((9,3,3,2,2,3,1,-2,-4))
         self.assertEqual(p.get_coefficient(0), -4)
         self.assertEqual(p.get_coefficient(2), 1)
-        self.assertEqual(p.get_coefficient(8), 1)
+        self.assertEqual(p.get_coefficient(8), 9)
         self.assertEqual(p.get_coefficient(9), 0)
 
 if __name__ == "__main__":
