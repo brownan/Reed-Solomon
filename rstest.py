@@ -1,4 +1,5 @@
 import unittest
+import itertools
 
 import rs
 
@@ -49,6 +50,42 @@ class TestRSdecoding(unittest.TestCase):
             decode = rs.decode(r)
 
             self.assertEqual(self.string, decode)
+
+    def atest_twoerr(self):
+        """Test every combination of 2 byte changes still decodes"""
+        for i1, i2 in itertools.combinations(range(len(self.code)), 2):
+            r = bytearray(self.code)
+
+            # increment the byte by 50
+            r[i1] = (r[i1] + 50) % 256
+            r[i2] = (r[i2] + 50) % 256
+
+            decode = rs.decode(r)
+            self.assertEqual(self.string, decode)
+
+    def test_16err(self):
+        """Tests if 16 byte errors still decodes"""
+        errors = [5, 6, 12, 13, 38, 40, 42, 47, 50, 57, 58, 59, 60, 61, 62, 65]
+        r = bytearray(self.code)
+
+        for e in errors:
+            r[e] = (r[e] + 50) % 256
+
+        decode = rs.decode(r)
+        self.assertEqual(self.string, decode)
+
+    def test_17err(self):
+        """Kinda pointless, checks that 17 errors doesn't decode"""
+        errors = [5, 6, 12, 13, 22, 38, 40, 42, 47, 50, 57, 58, 59, 60, 61, 62,
+                65]
+        r = bytearray(self.code)
+
+        for e in errors:
+            r[e] = (r[e] + 50) % 256
+
+        decode = rs.decode(r)
+        self.assertNotEqual(self.string, decode)
+
 
 if __name__ == "__main__":
     unittest.main()

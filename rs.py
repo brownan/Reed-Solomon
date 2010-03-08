@@ -66,7 +66,10 @@ def verify(code):
     divides g
     returns True/False
     """
-    c = Polynomial(GF256int(ord(x)) for x in code)
+    if isinstance(code, bytearray):
+        c = Polynomial(GF256int(x) for x in code)
+    else:
+        c = Polynomial(GF256int(ord(x)) for x in code)
     # Not sure what I was thinking with this, it still works...
     #return (c*h)%gtimesh == Polynomial((0,))
 
@@ -83,7 +86,10 @@ def decode(r):
     #    return r[:-32]
 
     # Turn r into a polynomial
-    r = Polynomial(GF256int(ord(x)) for x in r)
+    if isinstance(r, bytearray):
+        r = Polynomial(GF256int(x) for x in r)
+    else:
+        r = Polynomial(GF256int(ord(x)) for x in r)
 
     # Compute the syndromes:
     sz = _syndromes(r)
@@ -91,17 +97,17 @@ def decode(r):
     # Find the error locator polynomial and error evaluator polynomial using
     # the Berlekamp-Massey algorithm
     sigma, omega = _berlekamp_massey(sz)
-    print "sigma=%s" % sigma
-    print "omega=%s" % omega
+    #print "sigma=%s" % sigma
+    #print "omega=%s" % omega
 
     # Now use Chien's procedure to find the error locations
     X, j = _chien_search(sigma)
-    print "X=%s" % X
-    print "j=%s" % j
+    #print "X=%s" % X
+    #print "j=%s" % j
 
     # And finally, find the error magnitudes with Forney's Formula
     Y = _forney(omega, X)
-    print "Y=%s" % Y
+    #print "Y=%s" % Y
 
     # Put the error and locations together to form the error polynomial
     Elist = []
@@ -111,7 +117,7 @@ def decode(r):
         else:
             Elist.append(GF256int(0))
     E = Polynomial(reversed(Elist))
-    print "E=%s" % E
+    #print "E=%s" % E
 
     # And we get our real codeword!
     c = r - E
@@ -232,12 +238,6 @@ def _berlekamp_massey(s):
             raise Exception("Code shouldn't have gotten here")
 
 
-    print "sigmas:"
-    for s in sigma:
-        print "  %s" % s
-    print "omegas:"
-    for o in omega:
-        print "  %s" % o
     return sigma[-1], omega[-1]
 
 def _chien_search(sigma):
