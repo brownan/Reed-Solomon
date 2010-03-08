@@ -132,7 +132,6 @@ def decode(r):
         else:
             Elist.append(GF256int(0))
     E = Polynomial(reversed(Elist))
-    #print "E=%s" % E
 
     # And we get our real codeword!
     c = r - E
