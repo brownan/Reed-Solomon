@@ -36,6 +36,36 @@ class TestRSdecoding(unittest.TestCase):
 
         self.code = codestr
 
+    def test_bytearr(self):
+        """Tests that bytearrays are handled the same as strings"""
+        # Check the encoding already done
+        self.assertEqual(str, type(self.string))
+        self.assertEqual(str, type(self.code))
+
+        # Check that decoding produces string
+        decode = rs.decode(self.code)
+        self.assertEqual(str, type(decode))
+
+        # Encode and decode a bytearray
+        barr = bytearray(self.string)
+        bcode = rs.encode(barr)
+        bdecode = rs.decode(bcode)
+        # and with an error, so the verification fails and the full decoder
+        # runs
+        bdecode2 = rs.decode(bcode[:5] + chr((bcode[5]+50)%256) + bcode[6:])
+
+        # Check types
+        self.assertEqual(bytearray, type(barr))
+        self.assertEqual(bytearray, type(bcode))
+        self.assertEqual(bytearray, type(bdecode))
+        self.assertEqual(bytearray, type(bdecode2))
+
+        # Check correctness
+        self.assertEqual(self.string, barr)
+        self.assertEqual(self.code, bcode)
+        self.assertEqual(decode, bdecode)
+        self.assertEqual(decode, bdecode2)
+
     def test_noerr(self):
         """Make sure a codeword with no errors decodes"""
         decode = rs.decode(self.code)
@@ -51,8 +81,10 @@ class TestRSdecoding(unittest.TestCase):
 
             self.assertEqual(self.string, decode)
 
-    def atest_twoerr(self):
-        """Test every combination of 2 byte changes still decodes"""
+    def disabled_test_twoerr(self):
+        """Test that changing every combination of 2 bytes still decodes.
+        This test is long and probably unnecessary."""
+        # Test disabled, it takes too long
         for i1, i2 in itertools.combinations(range(len(self.code)), 2):
             r = bytearray(self.code)
 

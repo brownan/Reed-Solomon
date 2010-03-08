@@ -9,6 +9,8 @@ Warning: Because of the way I've implemented things, leading null bytes in a
 message are dropped. Be careful if encoding binary data.
 """
 
+__all__ = ["encode", "decode", "verify"]
+
 # Constants (do not change)
 n = 255
 k = 223
@@ -35,13 +37,21 @@ def encode(message, poly=False):
     string with 32 parity bytes at the end.
     If poly is not False, returns the encoded Polynomial object instead of
     the polynomial translated back to a string
+
+    Also accepts bytearray objects, in which case a bytearray object is
+    returned instead of a string.
     """
     if len(message)>k:
         raise ValueError("Message length is max %d. Message was %d" % (k,
             len(message)))
 
     # Encode message as a polynomial:
-    m = Polynomial(GF256int(ord(x)) for x in message)
+    if isinstance(message, bytearray):
+        m = Polynomial(GF256int(x) for x in message)
+        bytearr = 1
+    else:
+        m = Polynomial(GF256int(ord(x)) for x in message)
+        bytearr = 0
 
     # Shift polynomial up by n-k (32) by multiplying by x^32
     mprime = m * Polynomial((GF256int(1),) + (GF256int(0),)*(n-k))
@@ -59,37 +69,47 @@ def encode(message, poly=False):
         return c
 
     # Turn the polynomial c back into a byte string
-    return "".join(chr(x) for x in c.coefficients)
+    if bytearr:
+        return bytearray(c.coefficients)
+    else:
+        return "".join(chr(x) for x in c.coefficients)
 
 def verify(code):
     """Verifies the code is valid by testing that the code as a polynomial code
     divides g
+    Takes either a string or a bytearray object as input
     returns True/False
     """
     if isinstance(code, bytearray):
         c = Polynomial(GF256int(x) for x in code)
     else:
         c = Polynomial(GF256int(ord(x)) for x in code)
-    # Not sure what I was thinking with this, it still works...
-    #return (c*h)%gtimesh == Polynomial((0,))
+    # This works too, but takes longer. I don't know if there's any reason this
+    # check is more valid than the following one.
+    #return (c*h)%gtimesh == Polynomial(x0=0)
 
-    # ...But since all codewords are multiples of g, checking that code divides
-    # g should suffice for validating a codeword.
-    return c % g == Polynomial((0,))
+    # Since all codewords are multiples of g, checking that code divides g
+    # should suffice for validating a codeword.
+    return c % g == Polynomial(x0=0)
 
 def decode(r):
-    """Given a received byte string r, attempts to decode it. If it's a valid
-    codeword, or if there are less than 2s errors, the message is returned
+    """Given a received string or byte array r, attempts to decode it. If it's
+    a valid codeword, or if there are no more than 16 errors, the message is
+    returned.
+    If a string was given, a string is returned, if a bytearray was given, a
+    bytearray is returned
     """
-    #if verify(r):
-    #    # The last 32 bytes are parity
-    #    return r[:-32]
+    if verify(r):
+        # The last 32 bytes are parity
+        return r[:-32]
 
     # Turn r into a polynomial
     if isinstance(r, bytearray):
         r = Polynomial(GF256int(x) for x in r)
+        bytearr = 1
     else:
         r = Polynomial(GF256int(ord(x)) for x in r)
+        bytearr = 0
 
     # Compute the syndromes:
     sz = _syndromes(r)
@@ -97,17 +117,12 @@ def decode(r):
     # Find the error locator polynomial and error evaluator polynomial using
     # the Berlekamp-Massey algorithm
     sigma, omega = _berlekamp_massey(sz)
-    #print "sigma=%s" % sigma
-    #print "omega=%s" % omega
 
     # Now use Chien's procedure to find the error locations
     X, j = _chien_search(sigma)
-    #print "X=%s" % X
-    #print "j=%s" % j
 
     # And finally, find the error magnitudes with Forney's Formula
     Y = _forney(omega, X)
-    #print "Y=%s" % Y
 
     # Put the error and locations together to form the error polynomial
     Elist = []
@@ -123,7 +138,10 @@ def decode(r):
     c = r - E
 
     # Form it back into a string and return all but the last 32 bytes
-    return "".join(chr(x) for x in c.coefficients)[:-32]
+    if bytearr:
+        return bytearray(c.coefficients[:-32])
+    else:
+        return "".join(chr(x) for x in c.coefficients[:-32])
 
 
 def _syndromes(r):
