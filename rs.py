@@ -37,7 +37,7 @@ def encode(message, poly=False):
     """Encode a given string with reed-solomon encoding. Returns a byte
     string with 32 parity bytes at the end.
     If poly is not False, returns the encoded Polynomial object instead of
-    the polynomial translated back to a string
+    the polynomial translated back to a string (useful for debugging)
 
     Also accepts bytearray objects, in which case a bytearray object is
     returned instead of a string.
@@ -85,12 +85,12 @@ def verify(code):
         c = Polynomial(GF256int(x) for x in code)
     else:
         c = Polynomial(GF256int(ord(x)) for x in code)
-    # This works too, but takes longer. I don't know if there's any reason this
-    # check is more valid than the following one.
+
+    # This works too, but takes longer. Both checks are just as valid.
     #return (c*h)%gtimesh == Polynomial(x0=0)
 
     # Since all codewords are multiples of g, checking that code divides g
-    # should suffice for validating a codeword.
+    # suffices for validating a codeword.
     return c % g == Polynomial(x0=0)
 
 def decode(r):
@@ -216,12 +216,8 @@ def _berlekamp_massey(s):
 
         # Can now compute sigma[l+1] and omega[l+1] from
         # sigma[l], omega[l], tao[l], gamma[l], and Delta
-        sigma.append(
-                sigma[l] - Delta * Z * tao[l]
-                )
-        omega.append(
-                omega[l] - Delta * Z * gamma[l]
-                )
+        sigma.append( sigma[l] - Delta * Z * tao[l] )
+        omega.append( omega[l] - Delta * Z * gamma[l] )
 
         # Now compute the next tao and gamma
         # There are two ways to do this

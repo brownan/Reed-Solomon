@@ -22,7 +22,7 @@ class Polynomial(object):
         >>> print Polynomial(x32=5, x64=8)
         8x^64 + 5x^32
 
-        >>> print(Polynomial(x5=5, x9=4, x0=2))
+        >>> print Polynomial(x5=5, x9=4, x0=2) 
         4x^9 + 5x^5 + 2
         """
         if coefficients and sparse:
@@ -95,6 +95,7 @@ class Polynomial(object):
         return divmod(self, other)[0]
     def __mod__(self, other):
         return divmod(self, other)[1]
+
     def __divmod__(dividend, divisor):
         # See how many times the highest order term
         # of the divisor can go into the highest order term of the dividend
