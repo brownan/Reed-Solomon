@@ -6,7 +6,8 @@ from polynomial import Polynomial
 Specifically, RS(255,223), 223 data bytes and 32 parity bytes
 
 Warning: Because of the way I've implemented things, leading null bytes in a
-message are dropped. Be careful if encoding binary data.
+message are dropped. Be careful if encoding binary data, pad the data yourself
+to 223 bytes per block to avoid problems.
 """
 
 __all__ = ["encode", "decode", "verify"]
