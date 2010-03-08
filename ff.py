@@ -101,3 +101,24 @@ class GF256int(int):
     def __repr__(self):
         n = self.__class__.__name__
         return "%s(%r)" % (n, int(self))
+
+    def multiply(self, other):
+        """A slow multiply method. This method gives the same results as the
+        other multiply method, but is implemented to illustrate how it works
+        and how the above tables were generated.
+
+        This procedure is called Peasant's Algorithm (I believe)
+        """
+        a = int(self)
+        b = int(other)
+
+        p = a
+        r = 0
+        while b:
+            if b & 1: r = r ^ p
+            b = b >> 1
+            p = p << 1
+            if p & 0x100: p = p ^ 0x11b
+
+        return GF256int(r)
+        

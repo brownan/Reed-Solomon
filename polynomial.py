@@ -95,30 +95,28 @@ class Polynomial(object):
         return divmod(self, other)[0]
     def __mod__(self, other):
         return divmod(self, other)[1]
-    def __divmod__(self, other):
+    def __divmod__(dividend, divisor):
         # See how many times the highest order term
-        # of other can go into the highest order term of self
+        # of the divisor can go into the highest order term of the dividend
 
-        # "self"
-        dividend_power = len(self) - 1
-        dividend_coefficient = self.coefficients[0]
+        dividend_power = len(dividend) - 1
+        dividend_coefficient = dividend.coefficients[0]
 
-        # "other"
-        divisor_power = len(other) - 1
-        divisor_coefficient = other.coefficients[0]
+        divisor_power = len(divisor) - 1
+        divisor_coefficient = divisor.coefficients[0]
 
         quotient_power = dividend_power - divisor_power
         if quotient_power < 0:
             # Doesn't divide at all, return 0 for the quotient and the entire
             # dividend as the remander
-            return Polynomial((0,)), self
+            return Polynomial((0,)), dividend
 
         # Compute how many times the highest order term in the divisor goes
         # into the dividend
         quotient_coefficient = dividend_coefficient / divisor_coefficient
         quotient = Polynomial( (quotient_coefficient,) + (0,) * quotient_power )
 
-        remander = self - quotient * other
+        remander = dividend - quotient * divisor
 
         if remander.coefficients == (0,):
             # Goes in evenly with no remainder, we're done
@@ -126,7 +124,7 @@ class Polynomial(object):
 
         # There was a remander, see how many times the remainder goes into the
         # divisor
-        morequotient, remander = divmod(remander, other)
+        morequotient, remander = divmod(remander, divisor)
         return quotient + morequotient, remander
 
     def __eq__(self, other):

@@ -1,4 +1,5 @@
 import unittest
+import itertools
 
 from ff import GF256int
 
@@ -40,6 +41,14 @@ class TestGF256int(unittest.TestCase):
     def test_fermats_theorem(self):
         for x in range(1,256):
             self.assertEqual(GF256int(x)**255, 1)
+
+    def test_other_multiply(self):
+
+        a = GF256int(3)
+        b = GF256int(9)
+
+        self.assertEqual(a * b, a.multiply(b))
+
 
 if __name__ == "__main__":
     unittest.main()
