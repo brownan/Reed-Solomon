@@ -35,7 +35,13 @@ gtimesh = Polynomial(x255=GF256int(1), x0=GF256int(1))
 
 def encode(message, poly=False):
     """Encode a given string with reed-solomon encoding. Returns a byte
-    string with 32 parity bytes at the end.
+    string with the 223 message bytes and 32 parity bytes at the end.
+    
+    If a message is < 223 bytes long, it is assumed to be padded at the front
+    with null bytes.
+
+    The sequence returned is always 255 bytes long.
+
     If poly is not False, returns the encoded Polynomial object instead of
     the polynomial translated back to a string (useful for debugging)
 
@@ -71,9 +77,9 @@ def encode(message, poly=False):
 
     # Turn the polynomial c back into a byte string
     if bytearr:
-        return bytearray(c.coefficients)
+        return bytearray(c.coefficients).rjust(255, "\0")
     else:
-        return "".join(chr(x) for x in c.coefficients)
+        return "".join(chr(x) for x in c.coefficients).rjust(255, "\0")
 
 def verify(code):
     """Verifies the code is valid by testing that the code as a polynomial code
@@ -93,16 +99,25 @@ def verify(code):
     # suffices for validating a codeword.
     return c % g == Polynomial(x0=0)
 
-def decode(r):
+def decode(r, nostrip=False):
     """Given a received string or byte array r, attempts to decode it. If it's
     a valid codeword, or if there are no more than 16 errors, the message is
     returned.
     If a string was given, a string is returned, if a bytearray was given, a
     bytearray is returned
+
+    A message always has 223 bytes, if a message contained less it is left
+    padded with null bytes. When decoded, these leading null bytes are
+    stripped, but that can cause problems if decoding binary data. When nostrip
+    is True, messages returned are always 223 bytes long. This is useful to
+    make sure no data is lost when decoding binary data.
     """
     if verify(r):
         # The last 32 bytes are parity
-        return r[:-32]
+        if nostrip:
+            return r[:-32]
+        else:
+            return r[:-32].lstrip("\0")
 
     # Turn r into a polynomial
     if isinstance(r, bytearray):
@@ -139,9 +154,16 @@ def decode(r):
 
     # Form it back into a string and return all but the last 32 bytes
     if bytearr:
-        return bytearray(c.coefficients[:-32])
+        ret = bytearray(c.coefficients[:-32])
     else:
-        return "".join(chr(x) for x in c.coefficients[:-32])
+        ret = "".join(chr(x) for x in c.coefficients[:-32])
+
+    if nostrip:
+        # Polynomial objects don't store leading 0 coefficients, so we actually
+        # need to pad this to 223 bytes
+        return ret.rjust(223, "\0")
+    else:
+        return ret
 
 
 def _syndromes(r):

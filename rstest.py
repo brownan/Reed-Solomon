@@ -36,6 +36,27 @@ class TestRSdecoding(unittest.TestCase):
 
         self.code = codestr
 
+    def test_strip(self):
+        """Tests that the nostrip feature works"""
+        otherstr = self.string.rjust(223, "\0")
+        codestr = rs.encode(otherstr)
+
+        self.assertEqual(255, len(codestr))
+
+        # Decode with default behavior: stripping of leading null bytes
+        decode = rs.decode(codestr)
+        decode2 = rs.decode(codestr[:5] + "\x50" + codestr[6:])
+
+        self.assertEqual(self.string, decode)
+        self.assertEqual(self.string, decode2)
+
+        # Decode with nostrip
+        decode = rs.decode(codestr, nostrip=True)
+        decode2 = rs.decode(codestr[:5] + "\x50" + codestr[6:], nostrip=True)
+
+        self.assertEqual(otherstr, decode)
+        self.assertEqual(otherstr, decode2)
+
     def test_bytearr(self):
         """Tests that bytearrays are handled the same as strings"""
         # Check the encoding already done
