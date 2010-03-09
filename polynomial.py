@@ -13,7 +13,7 @@ class Polynomial(object):
         2) With keyword arguments such as for example x3=5, sets the
         coefficient of x^3 to be 5
 
-        3) With no arguments, creates an empty polynomial, equivilant to
+        3) With no arguments, creates an empty polynomial, equivalent to
         Polynomial((0,))
 
         >>> print Polynomial((5, 0, 0, 0, 0, 0))

@@ -7,7 +7,8 @@ Specifically, RS(255,223), 223 data bytes and 32 parity bytes
 
 Warning: Because of the way I've implemented things, leading null bytes in a
 message are dropped. Be careful if encoding binary data, pad the data yourself
-to 223 bytes per block to avoid problems.
+to 223 bytes per block to avoid problems. Also see the nostrip option to
+decode().
 """
 
 __all__ = ["encode", "decode", "verify"]
@@ -135,9 +136,14 @@ def decode(r, nostrip=False):
     sigma, omega = _berlekamp_massey(sz)
 
     # Now use Chien's procedure to find the error locations
+    # j is an array of integers representing the positions of the errors, 0
+    # being the rightmost byte
+    # X is a corresponding array of GF(2^8) values where X_i = alpha^(j_i)
     X, j = _chien_search(sigma)
 
     # And finally, find the error magnitudes with Forney's Formula
+    # Y is an array of GF(2^8) values corresponding to the error magnitude at
+    # the position given by the j array
     Y = _forney(omega, X)
 
     # Put the error and locations together to form the error polynomial
@@ -215,7 +221,7 @@ def _berlekamp_massey(s):
     D =      [ 0 ]
     B =      [ 0 ]
 
-    # Polonomial constants:
+    # Polynomial constants:
     ONE = Polynomial(z0=GF256int(1))
     ZERO = Polynomial(z0=GF256int(0))
     Z = Polynomial(z1=GF256int(1))
