@@ -1,3 +1,6 @@
+# Copyright (c) 2010 Andrew Brown <brownan@cs.duke.edu, brownan@gmail.com>
+# See LICENSE.txt for license terms
+
 from StringIO import StringIO
 
 class Polynomial(object):

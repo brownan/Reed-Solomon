@@ -1,3 +1,6 @@
+# Copyright (c) 2010 Andrew Brown <brownan@cs.duke.edu, brownan@gmail.com>
+# See LICENSE.txt for license terms
+
 class GF256int(int):
     """Instances of this object are elements of the field GF(2^8)
     Instances are integers in the range 0 to 255
