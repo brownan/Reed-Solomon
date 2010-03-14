@@ -17,13 +17,14 @@ def encode(input, output_filename):
     block of data will be one row, therefore, the data can be recovered if no
     more than 16 pixels per row are altered.
     """
+    coder = rs.RSCoder(255,223)
 
     output = []
 
     while True:
         block = input.read(223)
         if not block: break
-        code = rs.encode(block)
+        code = coder.encode(block)
         output.append(code)
         sys.stderr.write(".")
 
@@ -34,6 +35,7 @@ def encode(input, output_filename):
     out.save(output_filename)
 
 def decode(input_filename):
+    coder = rs.RSCoder(255,223)
     input = Image.open(input_filename)
     data = bytearray(input.getdata())
     del input
@@ -44,7 +46,7 @@ def decode(input_filename):
             break
         rowdata = data[blocknum*255:(blocknum+1)*255]
 
-        decoded = rs.decode(rowdata)
+        decoded = coder.decode(rowdata)
 
         blocknum += 1
         sys.stdout.write(str(decoded))
