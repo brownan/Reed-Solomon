@@ -55,6 +55,7 @@ class RSCoder(object):
 
         # g*h is used in verification, and is always x^n-1
         # TODO: This is hardcoded for (255,223)
+        # But it doesn't matter since my verify method doesn't use it
         self.gtimesh = Polynomial(x255=GF256int(1), x0=GF256int(1))
 
     def encode(self, message, poly=False):
@@ -133,7 +134,7 @@ class RSCoder(object):
 
     def decode(self, r, nostrip=False):
         """Given a received string or byte array r, attempts to decode it. If
-        it's a valid codeword, or if there are no more than 16 errors, the
+        it's a valid codeword, or if there are no more than (n-k)/2 errors, the
         message is returned.
         If a string was given, a string is returned, if a bytearray was given,
         a bytearray is returned
@@ -147,7 +148,7 @@ class RSCoder(object):
         n = self.n
         k = self.k
 
-        if 0 and self.verify(r):
+        if self.verify(r):
             # The last n-k bytes are parity
             if nostrip:
                 return r[:-(n-k)]
