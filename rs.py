@@ -24,13 +24,16 @@ class RSCoder(object):
         k is the length of the message, must be less than n
 
         The code will have error correcting power s where 2s = n - k
+
+        The typical RSCoder is RSCoder(255, 223)
         """
         if n < 0 or k < 0:
             raise ValueError("n and k must be positive")
         if not n < 256:
             raise ValueError("n must be at most 255")
         if not k < n:
-            raise ValueError("Codeword length n must be greater than message length k")
+            raise ValueError("Codeword length n must be greater than message"
+                    " length k")
         self.n = n
         self.k = k
 
@@ -106,8 +109,8 @@ class RSCoder(object):
             return "".join(chr(x) for x in c.coefficients).rjust(n, "\0")
 
     def verify(self, code):
-        """Verifies the code is valid by testing that the code as a polynomial code
-        divides g
+        """Verifies the code is valid by testing that the code as a polynomial
+        code divides g
         Takes either a string or a bytearray object as input
         returns True/False
         """
@@ -129,17 +132,17 @@ class RSCoder(object):
         return c % g == Polynomial(x0=0)
 
     def decode(self, r, nostrip=False):
-        """Given a received string or byte array r, attempts to decode it. If it's
-        a valid codeword, or if there are no more than 16 errors, the message is
-        returned.
-        If a string was given, a string is returned, if a bytearray was given, a
-        bytearray is returned
+        """Given a received string or byte array r, attempts to decode it. If
+        it's a valid codeword, or if there are no more than 16 errors, the
+        message is returned.
+        If a string was given, a string is returned, if a bytearray was given,
+        a bytearray is returned
 
-        A message always has 223 bytes, if a message contained less it is left
+        A message always has k bytes, if a message contained less it is left
         padded with null bytes. When decoded, these leading null bytes are
-        stripped, but that can cause problems if decoding binary data. When nostrip
-        is True, messages returned are always 223 bytes long. This is useful to
-        make sure no data is lost when decoding binary data.
+        stripped, but that can cause problems if decoding binary data. When
+        nostrip is True, messages returned are always k bytes long. This is
+        useful to make sure no data is lost when decoding binary data.
         """
         n = self.n
         k = self.k
@@ -223,16 +226,18 @@ class RSCoder(object):
         return sz
 
     def _berlekamp_massey(self, s):
-        """Computes and returns the error locator polynomial (sigma) and the error
-        evaluator polynomial (omega)
+        """Computes and returns the error locator polynomial (sigma) and the
+        error evaluator polynomial (omega)
         The parameter s is the syndrome polynomial (syndromes encoded in a
-        generator function)
+        generator function) as returned by _syndromes. Don't be confused with
+        the other s = (n-k)/2
 
         Notes:
         The error polynomial:
         E(x) = E_0 + E_1 x + ... + E_(n-1) x^(n-1)
 
-        j_1, j_2, ..., j_s are the error positions. (There are at most s errors)
+        j_1, j_2, ..., j_s are the error positions. (There are at most s
+        errors)
 
         Error location X_i is defined: X_i = α^(j_i)
         that is, the power of α corresponding to the error location
@@ -320,13 +325,13 @@ class RSCoder(object):
         return sigma[-1], omega[-1]
 
     def _chien_search(self, sigma):
-        """Recall the definition of sigma, it has s (16) roots. To find them,
-        this function evaluates sigma at all 255 non-zero points to find the roots
+        """Recall the definition of sigma, it has s roots. To find them, this
+        function evaluates sigma at all 255 non-zero points to find the roots
         The inverse of the roots are X_i, the error locations
 
-        Returns a list X of error locations, and a corresponding list j of error
-        positions (the discrete log of the corresponding X value)
-        The lists are up to s (16) elements large.
+        Returns a list X of error locations, and a corresponding list j of
+        error positions (the discrete log of the corresponding X value) The
+        lists are up to s elements large.
         """
         X = []
         j = []

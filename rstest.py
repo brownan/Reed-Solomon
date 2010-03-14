@@ -156,7 +156,7 @@ class TestOtherConfig(unittest.TestCase):
 
         self.assertEqual(255, len(code))
 
-        # Change 120 bytes. This code should tolerate up to 121 bytes changed
+        # Change 121 bytes. This code should tolerate up to 121 bytes changed
         changes = [1, 4, 5, 6, 9, 10, 14, 15, 19, 20, 21, 24, 26, 30, 32, 34,
                 38, 39, 40, 42, 43, 44, 45, 47, 49, 50, 53, 59, 60, 62, 65, 67,
                 68, 69, 71, 73, 74, 79, 80, 81, 85, 89, 90, 93, 94, 95, 100,
@@ -166,13 +166,34 @@ class TestOtherConfig(unittest.TestCase):
                 179, 182, 186, 191, 192, 193, 196, 197, 198, 200, 203, 206,
                 208, 209, 210, 211, 212, 216, 219, 222, 224, 225, 226, 228,
                 230, 232, 234, 235, 237, 238, 240, 242, 244, 245, 248, 249,
-                250]
+                250, 253]
         c = bytearray(code)
         for pos in changes:
             c[pos] = (c[pos] + 50) % 255
 
         decode = coder.decode(c)
         self.assertEqual(m, decode)
+
+    def test30_10(self):
+        """Tests the RS(30,10) code"""
+        coder = rs.RSCoder(30,10)
+        m = "Hello, wor"
+        code = coder.encode(m)
+
+        self.assertTrue( coder.verify(code) )
+        self.assertEqual(m, coder.decode(code) )
+        self.assertEqual(30, len(code))
+
+        # Change 10 bytes. This code should tolerate up to 10 bytes changed
+        changes = [0, 1, 2, 4, 7,
+                10, 14, 18, 22, 27]
+        c = bytearray(code)
+        for pos in changes:
+            c[pos] = (c[pos] + 50) % 255
+
+        decode = coder.decode(c)
+        self.assertEqual(m, decode)
+
 
 if __name__ == "__main__":
     unittest.main()
