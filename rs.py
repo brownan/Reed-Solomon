@@ -144,7 +144,7 @@ class RSCoder(object):
         n = self.n
         k = self.k
 
-        if self.verify(r):
+        if 0 and self.verify(r):
             # The last n-k bytes are parity
             if nostrip:
                 return r[:-(n-k)]
@@ -189,7 +189,7 @@ class RSCoder(object):
         # And we get our real codeword!
         c = r - E
 
-        # Form it back into a string and return all but the last 32 bytes
+        # Form it back into a string and return all but the last n-k bytes
         if bytearr:
             ret = bytearray(c.coefficients[:-(n-k)])
         else:
@@ -197,7 +197,7 @@ class RSCoder(object):
 
         if nostrip:
             # Polynomial objects don't store leading 0 coefficients, so we actually
-            # need to pad this to 223 bytes
+            # need to pad this to k bytes
             return ret.rjust(k, "\0")
         else:
             return ret
@@ -350,7 +350,7 @@ class RSCoder(object):
 
         for l, Xl in enumerate(X):
             # Compute the first part of Yl
-            Yl = Xl**16
+            Yl = Xl**s
             Yl *= omega.evaluate( Xl.inverse() )
             Yl *= Xl.inverse()
 

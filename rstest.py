@@ -143,6 +143,36 @@ class TestRSdecoding(unittest.TestCase):
         decode = self.coder.decode(r)
         self.assertNotEqual(self.string, decode)
 
+class TestOtherConfig(unittest.TestCase):
+    """Tests a configuration of the coder other than RS(255,223)"""
+
+    def test255_13(self):
+        coder = rs.RSCoder(255,13)
+        m = "Hello, world!"
+        code = coder.encode(m)
+
+        self.assertTrue( coder.verify(code) )
+        self.assertEqual(m, coder.decode(code) )
+
+        self.assertEqual(255, len(code))
+
+        # Change 120 bytes. This code should tolerate up to 121 bytes changed
+        changes = [1, 4, 5, 6, 9, 10, 14, 15, 19, 20, 21, 24, 26, 30, 32, 34,
+                38, 39, 40, 42, 43, 44, 45, 47, 49, 50, 53, 59, 60, 62, 65, 67,
+                68, 69, 71, 73, 74, 79, 80, 81, 85, 89, 90, 93, 94, 95, 100,
+                101, 105, 106, 107, 110, 112, 117, 120, 121, 123, 126, 127,
+                132, 133, 135, 136, 138, 143, 149, 150, 152, 154, 158, 159,
+                161, 162, 163, 165, 166, 168, 169, 170, 174, 176, 177, 178,
+                179, 182, 186, 191, 192, 193, 196, 197, 198, 200, 203, 206,
+                208, 209, 210, 211, 212, 216, 219, 222, 224, 225, 226, 228,
+                230, 232, 234, 235, 237, 238, 240, 242, 244, 245, 248, 249,
+                250]
+        c = bytearray(code)
+        for pos in changes:
+            c[pos] = (c[pos] + 50) % 255
+
+        decode = coder.decode(c)
+        self.assertEqual(m, decode)
 
 if __name__ == "__main__":
     unittest.main()
