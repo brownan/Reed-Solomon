@@ -4,16 +4,19 @@ import itertools
 import rs
 
 class TestRSverify(unittest.TestCase):
+    def setUp(self):
+        self.coder = rs.RSCoder(255,223)
+
     def test_one(self):
         """Tests a codeword without errors validates"""
-        code = rs.encode("Hello, world!")
+        code = self.coder.encode("Hello, world!")
 
-        self.assertTrue(rs.verify(code))
+        self.assertTrue(self.coder.verify(code))
 
     def test_two(self):
         """Verifies that changing any single character will invalidate the
         codeword"""
-        code = rs.encode("Hello, world! This is a test message, to be encoded,"
+        code = self.coder.encode("Hello, world! This is a test message, to be encoded,"
                 " and verified.")
 
         for i, c in enumerate(code):
@@ -26,33 +29,34 @@ class TestRSverify(unittest.TestCase):
                 c = chr(0)
             bad_code = code[:i] + c + code[i+1:]
 
-            self.assertFalse(rs.verify(bad_code))
+            self.assertFalse(self.coder.verify(bad_code))
 
 class TestRSdecoding(unittest.TestCase):
     def setUp(self):
+        self.coder = rs.RSCoder(255,223)
         self.string = "Hello, world! This is a long string"
 
-        codestr = rs.encode(self.string)
+        codestr = self.coder.encode(self.string)
 
         self.code = codestr
 
     def test_strip(self):
         """Tests that the nostrip feature works"""
         otherstr = self.string.rjust(223, "\0")
-        codestr = rs.encode(otherstr)
+        codestr = self.coder.encode(otherstr)
 
         self.assertEqual(255, len(codestr))
 
         # Decode with default behavior: stripping of leading null bytes
-        decode = rs.decode(codestr)
-        decode2 = rs.decode(codestr[:5] + "\x50" + codestr[6:])
+        decode = self.coder.decode(codestr)
+        decode2 = self.coder.decode(codestr[:5] + "\x50" + codestr[6:])
 
         self.assertEqual(self.string, decode)
         self.assertEqual(self.string, decode2)
 
         # Decode with nostrip
-        decode = rs.decode(codestr, nostrip=True)
-        decode2 = rs.decode(codestr[:5] + "\x50" + codestr[6:], nostrip=True)
+        decode = self.coder.decode(codestr, nostrip=True)
+        decode2 = self.coder.decode(codestr[:5] + "\x50" + codestr[6:], nostrip=True)
 
         self.assertEqual(otherstr, decode)
         self.assertEqual(otherstr, decode2)
@@ -64,16 +68,16 @@ class TestRSdecoding(unittest.TestCase):
         self.assertEqual(str, type(self.code))
 
         # Check that decoding produces string
-        decode = rs.decode(self.code)
+        decode = self.coder.decode(self.code)
         self.assertEqual(str, type(decode))
 
         # Encode and decode a bytearray
         barr = bytearray(self.string)
-        bcode = rs.encode(barr)
-        bdecode = rs.decode(bcode)
+        bcode = self.coder.encode(barr)
+        bdecode = self.coder.decode(bcode)
         # and with an error, so the verification fails and the full decoder
         # runs
-        bdecode2 = rs.decode(bcode[:5] + chr((bcode[5]+50)%256) + bcode[6:])
+        bdecode2 = self.coder.decode(bcode[:5] + chr((bcode[5]+50)%256) + bcode[6:])
 
         # Check types
         self.assertEqual(bytearray, type(barr))
@@ -89,7 +93,7 @@ class TestRSdecoding(unittest.TestCase):
 
     def test_noerr(self):
         """Make sure a codeword with no errors decodes"""
-        decode = rs.decode(self.code)
+        decode = self.coder.decode(self.code)
         self.assertEqual(self.string, decode)
 
     def test_oneerr(self):
@@ -98,7 +102,7 @@ class TestRSdecoding(unittest.TestCase):
             newch = chr( (ord(c)+50) % 256 )
             r = self.code[:i] + newch + self.code[i+1:]
 
-            decode = rs.decode(r)
+            decode = self.coder.decode(r)
 
             self.assertEqual(self.string, decode)
 
@@ -113,7 +117,7 @@ class TestRSdecoding(unittest.TestCase):
             r[i1] = (r[i1] + 50) % 256
             r[i2] = (r[i2] + 50) % 256
 
-            decode = rs.decode(r)
+            decode = self.coder.decode(r)
             self.assertEqual(self.string, decode)
 
     def test_16err(self):
@@ -124,7 +128,7 @@ class TestRSdecoding(unittest.TestCase):
         for e in errors:
             r[e] = (r[e] + 50) % 256
 
-        decode = rs.decode(r)
+        decode = self.coder.decode(r)
         self.assertEqual(self.string, decode)
 
     def test_17err(self):
@@ -136,7 +140,7 @@ class TestRSdecoding(unittest.TestCase):
         for e in errors:
             r[e] = (r[e] + 50) % 256
 
-        decode = rs.decode(r)
+        decode = self.coder.decode(r)
         self.assertNotEqual(self.string, decode)
 
 
