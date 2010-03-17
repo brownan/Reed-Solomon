@@ -13,7 +13,8 @@ My goal was to implement a working Reed-Solomon encoder and decoder in pure
 python using no non-standard libraries. I also aimed to keep the code fairly
 well commented and organized.
 
-However, a lot of the math involved is non-trivial and I can't explain it all in my comments. To learn more about the algorithm, see these resources:
+However, a lot of the math involved is non-trivial and I can't explain it all
+in my comments. To learn more about the algorithm, see these resources:
 * http://en.wikipedia.org/wiki/Reed–Solomon_error_correction
 * http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/reed_solomon.ps
 * http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/rs_decode.ps
@@ -129,7 +130,9 @@ ff.GF256int(value)
     x^8 + x^4 + x^3 + x + 1
     and using 3 as the generator for the exponent table and log table.
 
-The GF256int class inherits from int and supports all the usual integer operations. The following methods are overridden for arithmetic in the finite field GF(2^8)
+The GF256int class inherits from int and supports all the usual integer
+operations. The following methods are overridden for arithmetic in the finite
+field GF(2^8)
     __add__
     __div__
     __mul__
