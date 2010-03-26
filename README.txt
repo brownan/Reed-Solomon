@@ -56,15 +56,10 @@ RSCoder Objects
      If poly is not False, returns the encoded Polynomial object instead of
      the polynomial translated back to a string (useful for debugging)
      
-     Also accepts bytearray objects, in which case a bytearray object is
-     returned instead of a string.
- 
  RSCoder.decode(r, nostrip=False)
      Given a received string or byte array r, attempts to decode it. If
      it's a valid codeword, or if there are no more than (n-k)/2 errors, the
      message is returned.
-     If a string was given, a string is returned, if a bytearray was given,
-     a bytearray is returned
      
      A message always has k bytes, if a message contained less it is left
      padded with null bytes. When decoded, these leading null bytes are
@@ -75,7 +70,6 @@ RSCoder Objects
  RSCoder.verify(code)
      Verifies the code is valid by testing that the code as a polynomial
      code divides g
-     Takes either a string or a bytearray object as input
      returns True/False
 
 
