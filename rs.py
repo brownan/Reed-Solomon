@@ -166,8 +166,8 @@ class RSCoder(object):
         # Compute the syndromes:
         sz = self._syndromes(r)
 
-        # Find the error locator polynomial and error evaluator polynomial using
-        # the Berlekamp-Massey algorithm
+        # Find the error locator polynomial and error evaluator polynomial
+        # using the Berlekamp-Massey algorithm
         sigma, omega = self._berlekamp_massey(sz)
 
         # Now use Chien's procedure to find the error locations
@@ -177,8 +177,8 @@ class RSCoder(object):
         X, j = self._chien_search(sigma)
 
         # And finally, find the error magnitudes with Forney's Formula
-        # Y is an array of GF(2^8) values corresponding to the error magnitude at
-        # the position given by the j array
+        # Y is an array of GF(2^8) values corresponding to the error magnitude
+        # at the position given by the j array
         Y = self._forney(omega, X)
 
         # Put the error and locations together to form the error polynomial
