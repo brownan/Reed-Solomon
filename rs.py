@@ -69,9 +69,6 @@ class RSCoder(object):
 
         If poly is not False, returns the encoded Polynomial object instead of
         the polynomial translated back to a string (useful for debugging)
-
-        Also accepts bytearray objects, in which case a bytearray object is
-        returned instead of a string.
         """
         n = self.n
         k = self.k
@@ -81,12 +78,7 @@ class RSCoder(object):
                 len(message)))
 
         # Encode message as a polynomial:
-        if isinstance(message, bytearray):
-            m = Polynomial(GF256int(x) for x in message)
-            bytearr = 1
-        else:
-            m = Polynomial(GF256int(ord(x)) for x in message)
-            bytearr = 0
+        m = Polynomial(GF256int(ord(x)) for x in message)
 
         # Shift polynomial up by n-k by multiplying by x^(n-k)
         mprime = m * Polynomial((GF256int(1),) + (GF256int(0),)*(n-k))
@@ -104,15 +96,11 @@ class RSCoder(object):
             return c
 
         # Turn the polynomial c back into a byte string
-        if bytearr:
-            return bytearray(c.coefficients).rjust(n, "\0")
-        else:
-            return "".join(chr(x) for x in c.coefficients).rjust(n, "\0")
+        return "".join(chr(x) for x in c.coefficients).rjust(n, "\0")
 
     def verify(self, code):
         """Verifies the code is valid by testing that the code as a polynomial
         code divides g
-        Takes either a string or a bytearray object as input
         returns True/False
         """
         n = self.n
@@ -120,10 +108,7 @@ class RSCoder(object):
         h = self.h
         g = self.g
 
-        if isinstance(code, bytearray):
-            c = Polynomial(GF256int(x) for x in code)
-        else:
-            c = Polynomial(GF256int(ord(x)) for x in code)
+        c = Polynomial(GF256int(ord(x)) for x in code)
 
         # This works too, but takes longer. Both checks are just as valid.
         #return (c*h)%gtimesh == Polynomial(x0=0)
@@ -136,8 +121,6 @@ class RSCoder(object):
         """Given a received string or byte array r, attempts to decode it. If
         it's a valid codeword, or if there are no more than (n-k)/2 errors, the
         message is returned.
-        If a string was given, a string is returned, if a bytearray was given,
-        a bytearray is returned
 
         A message always has k bytes, if a message contained less it is left
         padded with null bytes. When decoded, these leading null bytes are
@@ -156,12 +139,7 @@ class RSCoder(object):
                 return r[:-(n-k)].lstrip("\0")
 
         # Turn r into a polynomial
-        if isinstance(r, bytearray):
-            r = Polynomial(GF256int(x) for x in r)
-            bytearr = 1
-        else:
-            r = Polynomial(GF256int(ord(x)) for x in r)
-            bytearr = 0
+        r = Polynomial(GF256int(ord(x)) for x in r)
 
         # Compute the syndromes:
         sz = self._syndromes(r)
@@ -194,14 +172,11 @@ class RSCoder(object):
         c = r - E
 
         # Form it back into a string and return all but the last n-k bytes
-        if bytearr:
-            ret = bytearray(c.coefficients[:-(n-k)])
-        else:
-            ret = "".join(chr(x) for x in c.coefficients[:-(n-k)])
+        ret = "".join(chr(x) for x in c.coefficients[:-(n-k)])
 
         if nostrip:
-            # Polynomial objects don't store leading 0 coefficients, so we actually
-            # need to pad this to k bytes
+            # Polynomial objects don't store leading 0 coefficients, so we
+            # actually need to pad this to k bytes
             return ret.rjust(k, "\0")
         else:
             return ret

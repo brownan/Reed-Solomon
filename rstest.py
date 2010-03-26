@@ -61,36 +61,6 @@ class TestRSdecoding(unittest.TestCase):
         self.assertEqual(otherstr, decode)
         self.assertEqual(otherstr, decode2)
 
-    def test_bytearr(self):
-        """Tests that bytearrays are handled the same as strings"""
-        # Check the encoding already done
-        self.assertEqual(str, type(self.string))
-        self.assertEqual(str, type(self.code))
-
-        # Check that decoding produces string
-        decode = self.coder.decode(self.code)
-        self.assertEqual(str, type(decode))
-
-        # Encode and decode a bytearray
-        barr = bytearray(self.string)
-        bcode = self.coder.encode(barr)
-        bdecode = self.coder.decode(bcode)
-        # and with an error, so the verification fails and the full decoder
-        # runs
-        bdecode2 = self.coder.decode(bcode[:5] + chr((bcode[5]+50)%256) + bcode[6:])
-
-        # Check types
-        self.assertEqual(bytearray, type(barr))
-        self.assertEqual(bytearray, type(bcode))
-        self.assertEqual(bytearray, type(bdecode))
-        self.assertEqual(bytearray, type(bdecode2))
-
-        # Check correctness
-        self.assertEqual(self.string, barr)
-        self.assertEqual(self.code, bcode)
-        self.assertEqual(decode, bdecode)
-        self.assertEqual(decode, bdecode2)
-
     def test_noerr(self):
         """Make sure a codeword with no errors decodes"""
         decode = self.coder.decode(self.code)
@@ -111,35 +81,40 @@ class TestRSdecoding(unittest.TestCase):
         This test is long and probably unnecessary."""
         # Test disabled, it takes too long
         for i1, i2 in itertools.combinations(range(len(self.code)), 2):
-            r = bytearray(self.code)
+            r = list(ord(x) for x in self.code)
 
             # increment the byte by 50
             r[i1] = (r[i1] + 50) % 256
             r[i2] = (r[i2] + 50) % 256
 
+            r = "".join(chr(x) for x in r)
             decode = self.coder.decode(r)
             self.assertEqual(self.string, decode)
 
     def test_16err(self):
         """Tests if 16 byte errors still decodes"""
         errors = [5, 6, 12, 13, 38, 40, 42, 47, 50, 57, 58, 59, 60, 61, 62, 65]
-        r = bytearray(self.code)
+        r = list(ord(x) for x in self.code)
 
         for e in errors:
             r[e] = (r[e] + 50) % 256
 
+        r = "".join(chr(x) for x in r)
         decode = self.coder.decode(r)
         self.assertEqual(self.string, decode)
 
     def test_17err(self):
-        """Kinda pointless, checks that 17 errors doesn't decode"""
+        """Kinda pointless, checks that 17 errors doesn't decode.
+        Actually, this could still decode by coincidence on some inputs,
+        so this test shouldn't be here at all."""
         errors = [5, 6, 12, 13, 22, 38, 40, 42, 47, 50, 57, 58, 59, 60, 61, 62,
                 65]
-        r = bytearray(self.code)
+        r = list(ord(x) for x in self.code)
 
         for e in errors:
             r[e] = (r[e] + 50) % 256
 
+        r = "".join(chr(x) for x in r)
         decode = self.coder.decode(r)
         self.assertNotEqual(self.string, decode)
 
@@ -167,10 +142,11 @@ class TestOtherConfig(unittest.TestCase):
                 208, 209, 210, 211, 212, 216, 219, 222, 224, 225, 226, 228,
                 230, 232, 234, 235, 237, 238, 240, 242, 244, 245, 248, 249,
                 250, 253]
-        c = bytearray(code)
+        c = list(ord(x) for x in code)
         for pos in changes:
             c[pos] = (c[pos] + 50) % 255
 
+        c = "".join(chr(x) for x in c)
         decode = coder.decode(c)
         self.assertEqual(m, decode)
 
@@ -187,10 +163,11 @@ class TestOtherConfig(unittest.TestCase):
         # Change 10 bytes. This code should tolerate up to 10 bytes changed
         changes = [0, 1, 2, 4, 7,
                 10, 14, 18, 22, 27]
-        c = bytearray(code)
+        c = list(ord(x) for x in code)
         for pos in changes:
             c[pos] = (c[pos] + 50) % 255
 
+        c = "".join(chr(x) for x in c)
         decode = coder.decode(c)
         self.assertEqual(m, decode)
 

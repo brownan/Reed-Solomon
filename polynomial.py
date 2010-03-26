@@ -100,19 +100,27 @@ class Polynomial(object):
         return divmod(self, other)[1]
 
     def __divmod__(dividend, divisor):
+        """Implements polynomial long-division recursively. I know this is
+        horribly inefficient, no need to rub it in. I know it can even throw
+        recursion depth errors on some versions of Python.
+
+        However, not being a math person myself, I implemented this from my
+        memory of how polynomial long division works. It's straightforward and
+        doesn't do anything fancy. There's no magic here.
+        """
         # See how many times the highest order term
         # of the divisor can go into the highest order term of the dividend
 
-        dividend_power = len(dividend) - 1
+        dividend_power = dividend.degree()
         dividend_coefficient = dividend.coefficients[0]
 
-        divisor_power = len(divisor) - 1
+        divisor_power = divisor.degree()
         divisor_coefficient = divisor.coefficients[0]
 
         quotient_power = dividend_power - divisor_power
         if quotient_power < 0:
             # Doesn't divide at all, return 0 for the quotient and the entire
-            # dividend as the remander
+            # dividend as the remainder
             return Polynomial((0,)), dividend
 
         # Compute how many times the highest order term in the divisor goes
@@ -126,7 +134,7 @@ class Polynomial(object):
             # Goes in evenly with no remainder, we're done
             return quotient, remander
 
-        # There was a remander, see how many times the remainder goes into the
+        # There was a remainder, see how many times the remainder goes into the
         # divisor
         morequotient, remander = divmod(remander, divisor)
         return quotient + morequotient, remander
