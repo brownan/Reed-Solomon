@@ -177,7 +177,7 @@
     \item $\Delta_{(l)}$ is the non-zero coefficient in $(1 + s(z))\sigma_{(l)}(z)$
     \item To find the next iteration's polynomials, we introduce two more polynomials $\tau_{(l)}(z)$ and $\gamma_{(l)}(z)$
     \item They must satisfy:
-    \[ (1 + s(z)) \tau_{(l)}(z) = \gamma_{(l)}(z) + z^l \pmod{z^{l+1}} \]
+    \[ (1 + s(z)) \tau_{(l)}(z) \stackrel{\pmod{z^{l+1}}}{=} \gamma_{(l)}(z) + z^l  \]
     \item And we have the following rules to derive the next $\sigma$ and $\omega$:
     \begin{eqnarray*}
     \sigma_{(l+1)}(z) &=& \sigma_{(l)}(z) - \Delta_{(l)}z\tau_{(l)}(z) \\
