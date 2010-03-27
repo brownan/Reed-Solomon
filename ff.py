@@ -8,7 +8,7 @@ class GF256int(int):
     x^8 + x^4 + x^3 + x + 1
     and using 3 as the generator for the exponent table and log table.
     """
-    # Maps integers to GF28 instances
+    # Maps integers to GF256int instances
     cache = {}
     # Exponent table for 3, a generator for GF(256)
     exptable = (1, 3, 5, 15, 17, 51, 85, 255, 26, 46, 114, 150, 161, 248, 19,
@@ -65,8 +65,7 @@ class GF256int(int):
             return newval
 
     def __add__(a, b):
-        """Addition in GF(2^8) is the xor of the two
-        """
+        "Addition in GF(2^8) is the xor of the two"
         return GF256int(a ^ b)
     __sub__ = __add__
     __radd__ = __add__
@@ -75,8 +74,7 @@ class GF256int(int):
         return self
     
     def __mul__(a, b):
-        """Multiplication in GF(2^8)
-        """
+        "Multiplication in GF(2^8)"
         if a == 0 or b == 0:
             return GF256int(0)
         x = GF256int.logtable[a]
@@ -87,7 +85,7 @@ class GF256int(int):
 
     def __pow__(self, power):
         if isinstance(power, GF256int):
-            raise Exception("Raising a Field element to another Field element is not defined")
+            raise TypeError("Raising a Field element to another Field element is not defined. power must be a regular integer")
         x = GF256int.logtable[self]
         z = (x * power) % 255
         return GF256int(GF256int.exptable[z])

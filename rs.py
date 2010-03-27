@@ -308,6 +308,11 @@ class RSCoder(object):
         Returns a list X of error locations, and a corresponding list j of
         error positions (the discrete log of the corresponding X value) The
         lists are up to s elements large.
+
+        Important technical math note: This implementation is not actually
+        Chien's search. Chien's search is a way to evaluate the polynomial
+        such that each evaluation only takes constant time. This here simply
+        does 255 evaluations straight up, which is much less efficient.
         """
         X = []
         j = []
@@ -324,7 +329,7 @@ class RSCoder(object):
 
     def _forney(self, omega, X):
         """Computes the error magnitudes"""
-        # XXX Is floor division okay here?
+        # XXX Is floor division okay here? Should this be ceiling?
         s = (self.n - self.k) // 2
 
         Y = []

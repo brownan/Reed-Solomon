@@ -6,7 +6,14 @@ from StringIO import StringIO
 class Polynomial(object):
     """Completely general polynomial class.
     
-    Polynomial objects are immutable"""
+    Polynomial objects are immutable.
+    
+    Implementation note: while this class is mostly agnostic to the type of
+    coefficients used (as long as they support the usual mathematical
+    operations), the Polynomial class still assumes the additive identity and
+    multiplicative identity are 0 and 1 respectively. If you're doing math over
+    some strange field or using non-numbers as coefficients, this class will
+    need to be modified."""
     def __init__(self, coefficients=(), **sparse):
         """
         There are three ways to initialize a Polynomial object.
@@ -168,15 +175,12 @@ class Polynomial(object):
         return buf.getvalue()[:-3]
 
     def evaluate(self, x):
-        """Evaluate this polynomial at value x, returning the result.  To be
-        completely general, this method is written to explicitly do each
-        calculation, taking O(n) time where n is len(self)
-        """
+        "Evaluate this polynomial at value x, returning the result."
         # Holds the sum over each term in the polynomial
         c = 0
 
         # Holds the current power of x. This is multiplied by x after each term
-        # in the polynomial is added up.
+        # in the polynomial is added up. Initialized to x^0 = 1
         p = 1
 
         for term in reversed(self.coefficients):
