@@ -37,7 +37,7 @@ def encode(input, output_filename):
 def decode(input_filename):
     coder = rs.RSCoder(255,223)
     input = Image.open(input_filename)
-    data = bytearray(input.getdata())
+    data = "".join(chr(x) for x in input.getdata())
     del input
 
     blocknum = 0
