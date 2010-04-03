@@ -173,6 +173,7 @@ class RSCoder(object):
 
         # Form it back into a string and return all but the last n-k bytes
         ret = "".join(chr(x) for x in c.coefficients[:-(n-k)])
+        #                                            :-(
 
         if nostrip:
             # Polynomial objects don't store leading 0 coefficients, so we

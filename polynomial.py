@@ -82,10 +82,10 @@ class Polynomial(object):
             t1 = (0,) * (-diff) + self.coefficients
             t2 = other.coefficients
 
-        return Polynomial(x+y for x,y in zip(t1, t2))
+        return self.__class__(x+y for x,y in zip(t1, t2))
 
     def __neg__(self):
-        return Polynomial(-x for x in self.coefficients)
+        return self.__class__(-x for x in self.coefficients)
     def __sub__(self, other):
         return self + -other
             
@@ -99,7 +99,7 @@ class Polynomial(object):
             for i2, c2 in enumerate(reversed(other.coefficients)):
                 terms[i1+i2] += c1*c2
 
-        return Polynomial(reversed(terms))
+        return self.__class__(reversed(terms))
 
     def __floordiv__(self, other):
         return divmod(self, other)[0]
@@ -115,6 +115,8 @@ class Polynomial(object):
         memory of how polynomial long division works. It's straightforward and
         doesn't do anything fancy. There's no magic here.
         """
+        class_ = dividend.__class__
+
         # See how many times the highest order term
         # of the divisor can go into the highest order term of the dividend
 
@@ -128,12 +130,12 @@ class Polynomial(object):
         if quotient_power < 0:
             # Doesn't divide at all, return 0 for the quotient and the entire
             # dividend as the remainder
-            return Polynomial((0,)), dividend
+            return class_((0,)), dividend
 
         # Compute how many times the highest order term in the divisor goes
         # into the dividend
         quotient_coefficient = dividend_coefficient / divisor_coefficient
-        quotient = Polynomial( (quotient_coefficient,) + (0,) * quotient_power )
+        quotient = class_( (quotient_coefficient,) + (0,) * quotient_power )
 
         remander = dividend - quotient * divisor
 
