@@ -14,6 +14,17 @@ Warning: Because of the way I've implemented things, leading null bytes in a
 message are dropped. Be careful if encoding binary data, pad the data yourself
 to k bytes per block to avoid problems. Also see the nostrip option to
 decode().
+
+When called as a script, this file encodes data from standard in and outputs it
+to standard out, using the standard RS code 255,223. This is suitable for
+encoding text and trying it out, but don't try to encode binary data with it!
+
+When encoding, it outputs blocks of 255 bytes, 223 of them are data (padded
+with leading null bytes if necessary) and then 32 bytes of parity data.
+
+Use the -d flag to decode data on standard in to standard out. This reads in
+blocks of 255 bytes, and outputs the decoded data from them. If there are less
+than 16 errors per block, your data will be recovered.
 """
 
 class RSCoder(object):
@@ -355,3 +366,21 @@ class RSCoder(object):
 
             Y.append(Yl)
         return Y
+
+if __name__ == "__main__":
+    import sys
+    coder = RSCoder(255,223)
+    if "-d" in sys.argv:
+        method = coder.decode
+        blocksize = 255
+    else:
+        method = coder.encode
+        blocksize = 223
+
+    while True:
+        block = sys.stdin.read(blocksize)
+        if not block: break
+        code = method(block)
+        sys.stdout.write(code)
+
+
