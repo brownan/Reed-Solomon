@@ -15,6 +15,7 @@ well commented and organized.
 
 However, a lot of the math involved is non-trivial and I can't explain it all
 in my comments. To learn more about the algorithm, see these resources:
+
 * http://en.wikipedia.org/wiki/Reed–Solomon_error_correction
 * http://www.cs.duke.edu/courses/spring10/cps296.3/rs_scribe.pdf
 * http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs_scribe.pdf
@@ -24,20 +25,26 @@ this past semester. Those notes were immensely useful and should be read by
 anyone wanting to learn the algorithm.
 
 Last two at Dr. Maggs' old site:
+
 * http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/reed_solomon.ps
 * http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/rs_decode.ps
 
 Also, here's a copy of the presentation I gave to the class Spring 2010 on my
 experience implementing this. The LaTeX source is in the presentation
 directory.
+
 http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs.pdf
 
 Files
 -----
-rs.py           Holds the Reed-Solomon Encoder/Decoder object
-polynomial.py   Contains the Polynomial object
-ff.py           Contains the GF256int object representing an element of the
-                GF(2^8) field
+rs.py
+    Holds the Reed-Solomon Encoder/Decoder object
+
+polynomial.py
+    Contains the Polynomial object
+
+ff.py
+    Contains the GF256int object representing an element of the GF(2^8) field
 
 Documentation
 -------------
@@ -53,33 +60,33 @@ rs.RSCoder(n, k)
  
 RSCoder Objects
 
- RSCoder.encode(message, poly=False)
-     Encode a given string with reed-solomon encoding. Returns a byte
-     string with the k message bytes and n-k parity bytes at the end.
-     
-     If a message is < k bytes long, it is assumed to be padded at the front
-     with null bytes.
-     
-     The sequence returned is always n bytes long.
-     
-     If poly is not False, returns the encoded Polynomial object instead of
-     the polynomial translated back to a string (useful for debugging)
-     
- RSCoder.decode(r, nostrip=False)
-     Given a received string or byte array r, attempts to decode it. If
-     it's a valid codeword, or if there are no more than (n-k)/2 errors, the
-     message is returned.
-     
-     A message always has k bytes, if a message contained less it is left
-     padded with null bytes. When decoded, these leading null bytes are
-     stripped, but that can cause problems if decoding binary data. When
-     nostrip is True, messages returned are always k bytes long. This is
-     useful to make sure no data is lost when decoding binary data.
- 
- RSCoder.verify(code)
-     Verifies the code is valid by testing that the code as a polynomial
-     code divides g
-     returns True/False
+RSCoder.encode(message, poly=False)
+    Encode a given string with reed-solomon encoding. Returns a byte
+    string with the k message bytes and n-k parity bytes at the end.
+    
+    If a message is < k bytes long, it is assumed to be padded at the front
+    with null bytes.
+    
+    The sequence returned is always n bytes long.
+    
+    If poly is not False, returns the encoded Polynomial object instead of
+    the polynomial translated back to a string (useful for debugging)
+    
+RSCoder.decode(r, nostrip=False)
+    Given a received string or byte array r, attempts to decode it. If
+    it's a valid codeword, or if there are no more than (n-k)/2 errors, the
+    message is returned.
+    
+    A message always has k bytes, if a message contained less it is left
+    padded with null bytes. When decoded, these leading null bytes are
+    stripped, but that can cause problems if decoding binary data. When
+    nostrip is True, messages returned are always k bytes long. This is
+    useful to make sure no data is lost when decoding binary data.
+
+RSCoder.verify(code)
+    Verifies the code is valid by testing that the code as a polynomial
+    code divides g
+    returns True/False
 
 
 Besides the main RSCoder object, two other objects are used in this
@@ -109,6 +116,9 @@ Polynomial objects export the following standard functions that perform the
 expected operations using polynomial arithmetic. Arithmetic of the coefficients
 is determined by the type passed in, so integers or GF256int objects could be
 used, the Polynomial class is agnostic to the type of the coefficients.
+
+::
+
     __add__
     __divmod__
     __eq__
@@ -136,6 +146,9 @@ ff.GF256int(value)
 The GF256int class inherits from int and supports all the usual integer
 operations. The following methods are overridden for arithmetic in the finite
 field GF(2^8)
+
+::
+
     __add__
     __div__
     __mul__
@@ -157,11 +170,11 @@ Examples
 >>> c = coder.encode("Hello, world!")
 >>> print repr(c)
 'Hello, world!\x8d\x13\xf4\xf9C\x10\xe5'
-
+>>>
 >>> r = "\0"*3 + c[3:]
 >>> print repr(r)
 '\x00\x00\x00lo, world!\x8d\x13\xf4\xf9C\x10\xe5'
-
+>>>
 >>> coder.decode(r)
 'Hello, world!'
 
