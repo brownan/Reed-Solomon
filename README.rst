@@ -16,9 +16,9 @@ well commented and organized.
 However, a lot of the math involved is non-trivial and I can't explain it all
 in my comments. To learn more about the algorithm, see these resources:
 
-* http://en.wikipedia.org/wiki/Reed–Solomon_error_correction
-* http://www.cs.duke.edu/courses/spring10/cps296.3/rs_scribe.pdf
-* http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs_scribe.pdf
+* `<http://en.wikipedia.org/wiki/Reed–Solomon_error_correction>`_
+* `<http://www.cs.duke.edu/courses/spring10/cps296.3/rs_scribe.pdf>`_
+* `<http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs_scribe.pdf>`_
 
 The last two resources are course notes from Bruce Maggs' class, which I took
 this past semester. Those notes were immensely useful and should be read by
@@ -26,14 +26,14 @@ anyone wanting to learn the algorithm.
 
 Last two at Dr. Maggs' old site:
 
-* http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/reed_solomon.ps
-* http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/rs_decode.ps
+* `<http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/reed_solomon.ps>`_
+* `<http://www.cs.cmu.edu/afs/cs.cmu.edu/project/pscico-guyb/realworld/www/rs_decode.ps>`_
 
 Also, here's a copy of the presentation I gave to the class Spring 2010 on my
 experience implementing this. The LaTeX source is in the presentation
 directory.
 
-http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs.pdf
+`<http://www.cs.duke.edu/courses/spring10/cps296.3/decoding_rs.pdf>`_
 
 Files
 -----
@@ -92,7 +92,7 @@ RSCoder.verify(code)
 Besides the main RSCoder object, two other objects are used in this
 implementation. Their use is not specifically tied to the coder.
 
-polynomial.Polynomial(coefficients=(), **sparse)
+polynomial.Polynomial(coefficients=(), \**sparse)
     There are three ways to initialize a Polynomial object.
     1) With a list, tuple, or other iterable, creates a polynomial using
     the items as coefficients in order of decreasing power
