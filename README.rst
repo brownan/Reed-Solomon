@@ -178,3 +178,27 @@ Examples
 >>> coder.decode(r)
 'Hello, world!'
 
+Image Encoder
+~~~~~~~~~~~~~
+imageencode.py is an example script that encodes codewords as rows in an image.
+It requires PIL to run.
+
+Usage: python imageencode.py [-d] <image file>
+
+Without the -d flag, imageencode.py will encode text from standard in and
+output it to the image file. With -d, imageencode.py will read in the data from
+the image and output to standard out the decoded text.
+
+An example is included: ``exampleimage.png``. Try decoding it as-is, then open
+it up in an image editor and paint some vertical stripes on it. As long as no
+more than 16 pixels per row are disturbed, the text will be decoded correctly.
+Then draw more stripes such that more than 16 pixels per row are disturbed and
+verify that the message is decoded improperly.
+
+Notice how the parity data looks different--the last 32 pixels of each row are
+colored differently. That's because this particular image contains encoded
+ASCII text, which generally only has bytes from a small range (the alphabet and
+printable punctuation). The parity data, however, is binary and contains bytes
+from the full range 0-255. Also note that either the data area or the parity
+area (or both!) can be disturbed as long as no more than 16 bytes per row are
+disturbed.
